@@ -19,23 +19,23 @@ public class Constants {
 	public static final String API_KEY = "API_KEY";
 
 	//Exceptions
-	public static final String ERROR_REQUEST = "Error procesando la peticion";
-	public static final String ERROR_ALGORITMO = "Error: Algoritmo no encontrado o no soportado. ";
-	public static final String ERROR_INVALID_KEY = "Error: Clave inválida utilizada para la desencriptación. ";
-	public static final String ERROR_BAD_PADDING = "Error: Relleno incorrecto durante la desencriptación. ";
-	public static final String ERROR_ILLEGAL_BLOCK_SIZE = "Error: Tamaño de bloque ilegal durante la desencriptación. ";
-	public static final String DECRYPT_PASSWORD = "Error: Ocurrió un error inesperado durante la desencriptación. ";
-	public static final String ERROR_SQL_GET_USER_EMAIL = "Error SQL: Al obtener el usuario por correo electrónico. ";
-	public static final String ERROR_SQL_USER_EXIST = "Error SQL: Al verificar si el usuario existe por cédula. ";
-	public static final String ERROR_SQL_SAVE_USER = "Error SQL: Al guardar el usuario en la base de datos. ";
-	public static final String ERROR_SQL_GET_RECORD = "Error SQL: Durante la consulta del historial. ";
-	public static final String ERROR_SQL_SAVE_RECORD = "Error SQL: Durante la creación de la relación del usuario con el historial. ";
-	public static final String ERROR_SQL_UPDATE_RECORD = "Error SQL: Durante la actualización de historial. ";
-	public static final String ERROR_SQL_DELETE_RECORDS = "Error SQL: Durante la eliminación del historial. ";
-	public static final String ERROR_GET_RECORDS = "Error: Durante la consulta del historial. ";
-	public static final String ERROR_SAVE_RECORDS = "Error: Guardando el historial. ";
-	public static final String ERROR_DELETE_RECORDS = "Error: Eliminando el historial. ";
-	public static final String ERROR_UPDATE_RECORDS = "Error: Actualizando el historial. ";
+	public static final String ERROR_REQUEST = "Error procesando la peticion ";
+	public static final String ERROR_ALGORITMO = "Error: Algoritmo no encontrado o no soportado: ";
+	public static final String ERROR_INVALID_KEY = "Error: Clave inválida utilizada para la desencriptación: ";
+	public static final String ERROR_BAD_PADDING = "Error: Relleno incorrecto durante la desencriptación: ";
+	public static final String ERROR_ILLEGAL_BLOCK_SIZE = "Error: Tamaño de bloque ilegal durante la desencriptación: ";
+	public static final String DECRYPT_PASSWORD = "Error: Ocurrió un error inesperado durante la desencriptación: ";
+	public static final String ERROR_SQL_GET_USER_EMAIL = "Error SQL: Al obtener el usuario por correo electrónico: ";
+	public static final String ERROR_SQL_USER_EXIST = "Error SQL: Al verificar si el usuario existe por cédula: ";
+	public static final String ERROR_SQL_SAVE_USER = "Error SQL: Al guardar el usuario en la base de datos: ";
+	public static final String ERROR_SQL_GET_RECORD = "Error SQL: Durante la consulta del historial: ";
+	public static final String ERROR_SQL_SAVE_RECORD = "Error SQL: Durante la creación de la relación del usuario con el historial: ";
+	public static final String ERROR_SQL_UPDATE_RECORD = "Error SQL: Durante la actualización de historial: ";
+	public static final String ERROR_SQL_DELETE_RECORDS = "Error SQL: Durante la eliminación del historial: ";
+	public static final String ERROR_GET_RECORDS = "Error: Durante la consulta del historial: ";
+	public static final String ERROR_SAVE_RECORDS = "Error: Guardando el historial: ";
+	public static final String ERROR_DELETE_RECORDS = "Error: Eliminando el historial: ";
+	public static final String ERROR_UPDATE_RECORDS = "Error: Actualizando el historial: ";
 	public static final String ERROR_QUERY_AGENT = "Error: Durante la consulta con el agente IA: ";
 
 	//Logs

@@ -50,7 +50,7 @@ public class RecordRepositoryImpl implements RecordRepository {
 			}
 
 		} catch (SQLException e) {
-			throw new UserException(Constants.ERROR_SQL_GET_RECORD, 400, e.getMessage());
+			throw new UserException(Constants.ERROR_SQL_GET_RECORD + e.getMessage(), 400, e.getMessage());
 		}
 
 		return records;
@@ -89,7 +89,7 @@ public class RecordRepositoryImpl implements RecordRepository {
 					log.error("Error en rollback", ex);
 				}
 			}
-			throw new UserException(Constants.ERROR_SQL_SAVE_RECORD, 400, e.getMessage());
+			throw new UserException(Constants.ERROR_SQL_SAVE_RECORD + e.getMessage(), 400, e.getMessage());
 
 		} finally {
 			if (connection != null) {
@@ -112,7 +112,7 @@ public class RecordRepositoryImpl implements RecordRepository {
 			preparedStatement.setString(1, cedula);
 			return preparedStatement.executeQuery().next();
 		} catch (SQLException e) {
-			throw new UserException(Constants.ERROR_SQL_USER_EXIST, 400, e.getMessage());
+			throw new UserException(Constants.ERROR_SQL_USER_EXIST + e.getMessage(), 400, e.getMessage());
 		}
 	}
 
@@ -134,7 +134,7 @@ public class RecordRepositoryImpl implements RecordRepository {
 			}
 
 		} catch (Exception e) {
-			throw new UserException(Constants.ERROR_SQL_GET_RECORD, 400, e.getMessage());
+			throw new UserException(Constants.ERROR_SQL_GET_RECORD + e.getMessage(), 400, e.getMessage());
 		}
 		return recordEntity;
 	}
@@ -148,7 +148,7 @@ public class RecordRepositoryImpl implements RecordRepository {
 			preparedStatement.setString(1, id);
 			preparedStatement.executeUpdate();
 		} catch (Exception e) {
-			throw new UserException(Constants.ERROR_SQL_DELETE_RECORDS, 400, e.getMessage());
+			throw new UserException(Constants.ERROR_SQL_DELETE_RECORDS + e.getMessage(), 400, e.getMessage());
 		}
 	}
 	
@@ -161,7 +161,7 @@ public class RecordRepositoryImpl implements RecordRepository {
 			preparedStatement.setString(1, module);
 			return preparedStatement.executeQuery().next();
 		} catch (SQLException e) {
-			throw new UserException(Constants.ERROR_SQL_USER_EXIST, 400, e.getMessage());
+			throw new UserException(Constants.ERROR_SQL_USER_EXIST + e.getMessage(), 400, e.getMessage());
 		}
 	}
 
@@ -190,7 +190,7 @@ public class RecordRepositoryImpl implements RecordRepository {
 					log.error("Error en rollback", ex);
 				}
 			}
-			throw new UserException(Constants.ERROR_SQL_UPDATE_RECORD, 400, e.getMessage());
+			throw new UserException(Constants.ERROR_SQL_UPDATE_RECORD + e.getMessage(), 400, e.getMessage());
 		} finally {
 			if (connection != null) {
 				try {

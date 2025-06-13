@@ -44,7 +44,7 @@ public class UserRepositoryImpl implements UserRepository{
 			}
 
 		} catch (SQLException e) {
-			throw new UserException(Constants.ERROR_SQL_GET_USER_EMAIL, 1001, e.getMessage());
+			throw new UserException(Constants.ERROR_SQL_GET_USER_EMAIL + e.getMessage(), 1001, e.getMessage());
 		}
 
 		return Optional.empty();
@@ -59,7 +59,7 @@ public class UserRepositoryImpl implements UserRepository{
 			preparedStatement.setString(1, cedula);
 			return preparedStatement.executeQuery().next();
 		} catch (SQLException e) {
-			throw new UserException(Constants.ERROR_SQL_USER_EXIST, 1002, e.getMessage());
+			throw new UserException(Constants.ERROR_SQL_USER_EXIST + e.getMessage(), 1002, e.getMessage());
 		}
 	}
 
@@ -78,7 +78,7 @@ public class UserRepositoryImpl implements UserRepository{
 			preparedStatement.executeUpdate();
 			return user;
 		} catch (SQLException e) {
-			throw new UserException(Constants.ERROR_SQL_SAVE_USER, 1003, e.getMessage());
+			throw new UserException(Constants.ERROR_SQL_SAVE_USER + e.getMessage(), 1003, e.getMessage());
 		}
 	}
 

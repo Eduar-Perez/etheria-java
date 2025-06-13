@@ -59,7 +59,7 @@ public class RecordUserRepositoryImpl implements RecordUserRepository {
 			return recordUserEntity;
 
 		} catch (Exception e) {
-			throw new UserException(Constants.ERROR_SQL_SAVE_RECORD, 1003, e.getMessage());
+			throw new UserException(Constants.ERROR_SQL_SAVE_RECORD + e.getMessage(), 1003, e.getMessage());
 		}
 	}
 
