@@ -1,0 +1,19 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  UserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: com.periferia.etheria.UserHandler::handleRequest
+      Runtime: java17
+      CodeUri: UserFunction
+      MemorySize: 512
+      Timeout: 10
+      Environment:
+        Variables:
+          JWT_SECRET: bXktc2VjcmV0LWtleQ==
+          DB_URL: your-url
+          DB_USERNAME: your-user
+          DB_PASSWORD: your-pass
+    Metadata:
+      SamResourceId: UserFunction
