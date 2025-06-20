@@ -31,10 +31,14 @@ public class RecordServiceImpl implements RecordService {
 		log.info(Constants.LOGIN_SERVICE, Thread.currentThread().getStackTrace()[1].getMethodName());
 		List<RecordDto> response = new ArrayList<>();
 		try {
-			response = RecordUtil.convertEntityToDtoList(recordRepository.getRecords(cedula));
+			token = token.substring(7);
+			if(Boolean.TRUE.equals(jwtService.validateToken(token)))
+				response = RecordUtil.convertEntityToDtoList(recordRepository.getRecords(cedula));
+			else
+				throw new UserException("Contraseña incorrecta: ", 400, Constants.ERROR_CONTRASENA);
 		} catch (Exception e) {
 			log.error(Constants.ERROR_GET_RECORDS);
-			throw new UserException("Error consultando el historial del chat", 500, e.getMessage());			
+			throw new UserException("Error consultando el historial del chat: " + e.getMessage(), 500, e.getMessage());			
 		}
 		return new Response<>(200, "Registro consultado con exito", response);
 
@@ -52,7 +56,7 @@ public class RecordServiceImpl implements RecordService {
 			}
 		} catch (Exception e) {
 			log.error(Constants.ERROR_SAVE_RECORDS);
-			throw new UserException(Constants.ERROR_SAVE_RECORDS, 400, e.getMessage());
+			throw new UserException(Constants.ERROR_SAVE_RECORDS + e.getMessage(), 400, e.getMessage());
 		}
 	}
 
@@ -69,10 +73,10 @@ public class RecordServiceImpl implements RecordService {
 				return new Response<>(200, "Historial eliminado con exito", true);
 			}
 			else {
-				throw new UserException("Contraseña incorrecta ", 400, "Contraseña inválida.");
+				throw new UserException("Contraseña incorrecta: ", 400, Constants.ERROR_CONTRASENA);
 			}
 		} catch (UserException e) {
-			log.error(Constants.ERROR_DELETE_RECORDS +" " + e.getMessage());
+			log.error(Constants.ERROR_DELETE_RECORDS + e.getMessage());
 			return new Response<>(e.getErrorCode(), e.getMessage() + e.getErrorDetail(), null);
 		}
 	}
@@ -84,7 +88,7 @@ public class RecordServiceImpl implements RecordService {
 			recordRepository.updateRecord(recordEntity);
 		} catch (Exception e) {
 			log.error(Constants.ERROR_UPDATE_RECORDS + e.getMessage());
-			throw new UserException(Constants.ERROR_UPDATE_RECORDS, 500, e.getMessage());
+			throw new UserException(Constants.ERROR_UPDATE_RECORDS + e.getMessage(), 500, e.getMessage());
 		}
 	}
 

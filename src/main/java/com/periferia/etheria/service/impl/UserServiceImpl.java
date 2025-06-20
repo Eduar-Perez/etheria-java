@@ -73,17 +73,4 @@ public class UserServiceImpl implements UserService {
 			return new Response<>(500, "Error interno del servidor ", null);
 		}
 	}
-
-	@Override
-	public Response<Boolean> logout(String token) {
-		log.info(Constants.LOGIN_SERVICE, Thread.currentThread().getStackTrace()[1].getMethodName());
-		try {
-			jwtService.logout(token);
-		} catch (Exception e) {
-			log.info(Constants.ERROR_LOGIN + e.getMessage());
-			return new Response<>(500, "Error interno del servidor ", null);
-		}
-		return null;
-	}
-
 }

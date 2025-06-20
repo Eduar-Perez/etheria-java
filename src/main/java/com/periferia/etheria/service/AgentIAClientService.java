@@ -1,7 +1,11 @@
 package com.periferia.etheria.service;
 
+import java.util.List;
+
+import com.periferia.etheria.dto.FilesDto;
+
 public interface AgentIAClientService {
 
-	public String sendQuestionToAgent(String questiong, String model, String agent, byte[] fileBase64);
+	public String sendQuestionToAgent(String questiong, String model, String agent, List<FilesDto> fileBase64);
 
 }

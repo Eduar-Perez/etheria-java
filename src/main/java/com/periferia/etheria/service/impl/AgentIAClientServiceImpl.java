@@ -6,12 +6,12 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.util.Base64;
-
+import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.periferia.etheria.constants.Constants;
+import com.periferia.etheria.dto.FilesDto;
 import com.periferia.etheria.exception.UserException;
 import com.periferia.etheria.service.AgentIAClientService;
 
@@ -26,9 +26,8 @@ public class AgentIAClientServiceImpl implements AgentIAClientService {
 			.build();
 
 	@Override
-	public String sendQuestionToAgent(String question, String model, String agent, byte[] fileBase64) {
+	public String sendQuestionToAgent(String question, String model, String agent, List<FilesDto> fileBase64) {
 		log.info(Thread.currentThread().getStackTrace()[1].getMethodName());
-		String fileBase64String = fileBase64 != null ? Base64.getEncoder().encodeToString(fileBase64) : null;
 
 		try {
 			ObjectMapper mapper = new ObjectMapper();
@@ -36,7 +35,7 @@ public class AgentIAClientServiceImpl implements AgentIAClientService {
 			requestBody.put("question", question);
 			requestBody.put("model", model);
 			requestBody.put("agent_id", agent);
-			requestBody.put("file", fileBase64String);
+			//requestBody.put("file", fileBase64);
 			String body = mapper.writeValueAsString(requestBody);
 
 			HttpRequest request = HttpRequest.newBuilder()

@@ -7,6 +7,5 @@ public interface UserService {
 
 	public Response<Boolean> registerUser(UserDto userDto);
 	public Response<UserDto> loginUser(UserDto userDto);
-	public Response<Boolean> logout(String token);
 	
 }

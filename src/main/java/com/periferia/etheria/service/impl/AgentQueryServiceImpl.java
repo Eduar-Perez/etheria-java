@@ -3,6 +3,7 @@ package com.periferia.etheria.service.impl;
 import java.util.Map;
 
 import com.periferia.etheria.constants.Constants;
+import com.periferia.etheria.dto.QueryAgentDto;
 import com.periferia.etheria.dto.RecordDto;
 import com.periferia.etheria.exception.UserException;
 import com.periferia.etheria.repository.RecordUserRepository;
@@ -32,24 +33,21 @@ public class AgentQueryServiceImpl implements AgentQueryService {
 	}
 
 	@Override
-	public Response<RecordDto> requestQuery(String token, String question, String response, String cedula, String uuid, String model, String agent, byte[] fileBase64) {
+	public Response<RecordDto> requestQuery(String token, QueryAgentDto queryAgentDto) {
 		log.info(Constants.LOGIN_SERVICE, Thread.currentThread().getStackTrace()[1].getMethodName());
-		RecordDto responseQuestion = new RecordDto(null, question, response, null, uuid);
+		RecordDto recordDto = new RecordDto(null, queryAgentDto.getQuestion(), null, null, queryAgentDto.getUuid());
 		try {
 			Map<String, String> modelsAgents = Constants.getModelsAgents();
 			token = token.substring(7);
 			if(Boolean.TRUE.equals(jwtService.validateToken(token))) {
-				RecordDto recordDto = recordService.saveRecord(question, response, uuid);
+				recordDto = recordService.saveRecord(queryAgentDto.getQuestion(), null, queryAgentDto.getUuid());
 				if(recordDto.getId() != null) {
-					recordUserRepository.saveRecordUserEntity(recordDto.getId(), cedula);
+					recordUserRepository.saveRecordUserEntity(recordDto.getId(), queryAgentDto.getCedula());
 				}
-				response = agentClient.sendQuestionToAgent(question, modelsAgents.get(model), agent, fileBase64);
-				recordDto.setResponse(response);
+				recordDto.setResponse(agentClient.sendQuestionToAgent(queryAgentDto.getQuestion(), modelsAgents.get(queryAgentDto.getModel()),
+						queryAgentDto.getAgentId(), queryAgentDto.getFiles()));
 				recordService.updateRecord(RecordUtil.convertDtoToEntity(recordDto));
-				responseQuestion.setId(recordDto.getId());
-				responseQuestion.setDateCreate(recordDto.getDateCreate());
-				responseQuestion.setResponse(response);
-				return new Response<>(200, "Se conecta con el agente y se guarda el historial", responseQuestion);
+				return new Response<>(200, "Se conecta con el agente y se guarda el historial", recordDto);
 			}
 			else {
 				return new Response<>(401, "Token no valido para la sesión", null);
@@ -62,7 +60,6 @@ public class AgentQueryServiceImpl implements AgentQueryService {
 
 	public void setResponseRecord(RecordDto recordDto, String response) {
 		recordDto.setResponse(response);
-
 	}
 
 }

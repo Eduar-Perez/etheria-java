@@ -2,12 +2,10 @@ package com.periferia.etheria.security;
 
 import java.time.Instant;
 import java.util.Date;
-
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-
 import com.periferia.etheria.constants.Constants;
-
+import com.periferia.etheria.exception.UserException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -45,13 +43,7 @@ public class JwtService {
 			return true;
 		} catch (JwtException e) {
 			log.error("El token no coincide " + e.getMessage());
-			return false;
+			throw new UserException(Constants.TOKEN_EXPIRATED + e.getMessage(), 400, e.getMessage());
 		}
 	}
-	
-	public Boolean logout(String token) {
-		
-		return null;
-	}
-
 }

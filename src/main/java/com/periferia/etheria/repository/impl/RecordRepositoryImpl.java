@@ -121,6 +121,7 @@ public class RecordRepositoryImpl implements RecordRepository {
 		log.info(Constants.LOGIN_SQL, Thread.currentThread().getStackTrace()[1].getMethodName());
 		StringBuilder sqlBuilder = new StringBuilder(ConstantsSql.VAR_SENTENCIA_SQL_FIND_BY_ID_RECORD.getValue());
 		RecordEntity recordEntity = new RecordEntity();
+		
 		try(Connection connection = dataBaseConnection.getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(sqlBuilder.toString())) {
 			preparedStatement.setLong(1, id);
@@ -134,7 +135,7 @@ public class RecordRepositoryImpl implements RecordRepository {
 			}
 
 		} catch (Exception e) {
-			throw new UserException(Constants.ERROR_SQL_GET_RECORD + e.getMessage(), 400, e.getMessage());
+			throw new UserException(Constants.ERROR_SQL_GET_RECORD + e.getMessage(), 500, e.getMessage());
 		}
 		return recordEntity;
 	}
@@ -143,6 +144,7 @@ public class RecordRepositoryImpl implements RecordRepository {
 	public void deleteById(String id) {
 		log.info(Constants.LOGIN_SQL, Thread.currentThread().getStackTrace()[1].getMethodName());
 		StringBuilder sqlBuilder = new StringBuilder(ConstantsSql.VAR_SENTENCIA_SQL_DELETE_BY_MODULE.getValue());
+		
 		try(Connection connection = dataBaseConnection.getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(sqlBuilder.toString())) {
 			preparedStatement.setString(1, id);
@@ -156,6 +158,7 @@ public class RecordRepositoryImpl implements RecordRepository {
 	public boolean existByModule(String module) {
 		log.info(Constants.LOGIN_SQL, Thread.currentThread().getStackTrace()[1].getMethodName());
 		StringBuilder sqlBuilder = new StringBuilder(ConstantsSql.VAR_SENTENCIA_SQL_EXIST_BY_MODULE.getValue());
+		
 		try(Connection connection = dataBaseConnection.getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(sqlBuilder.toString())) {
 			preparedStatement.setString(1, module);

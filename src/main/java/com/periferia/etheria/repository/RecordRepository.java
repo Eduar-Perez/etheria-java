@@ -12,6 +12,6 @@ public interface RecordRepository {
 	public boolean existById(String cedula);
 	public void deleteById(String id);
 	public void updateRecord(RecordEntity recordEntity);
-	public boolean existByModule(String cedula);
+	public boolean existByModule(String uuid);
 	
 }

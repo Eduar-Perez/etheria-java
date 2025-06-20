@@ -37,7 +37,8 @@ public class UserRepositoryImpl implements UserRepository{
 							resultSet.getString("first_name"),
 							resultSet.getString("last_name"),
 							resultSet.getString("email"),
-							resultSet.getString("password")
+							resultSet.getString("password"),
+							resultSet.getString("role")
 							);
 					return Optional.of(user);
 				}
@@ -75,6 +76,7 @@ public class UserRepositoryImpl implements UserRepository{
 			preparedStatement.setString(3, user.getLastName());
 			preparedStatement.setString(4, user.getEmail());
 			preparedStatement.setString(5, user.getPassword());
+			preparedStatement.setString(6, user.getRole());
 			preparedStatement.executeUpdate();
 			return user;
 		} catch (SQLException e) {
