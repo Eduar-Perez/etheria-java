@@ -9,6 +9,7 @@ import java.time.Duration;
 import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.periferia.etheria.constants.Constants;
 import com.periferia.etheria.dto.FilesDto;
@@ -35,7 +36,16 @@ public class AgentIAClientServiceImpl implements AgentIAClientService {
 			requestBody.put("question", question);
 			requestBody.put("model", model);
 			requestBody.put("agent_id", agent);
-			//requestBody.put("file", fileBase64);
+
+			ArrayNode filesArray = mapper.createArrayNode();
+			for(FilesDto fileDto: fileBase64) {
+				ObjectNode fileObject = mapper.createObjectNode();
+				fileObject.put("file", fileDto.getFile());
+				fileObject.put("fileName", fileDto.getFileName());
+				filesArray.add(fileObject);
+			}
+			requestBody.set("files", filesArray);
+
 			String body = mapper.writeValueAsString(requestBody);
 
 			HttpRequest request = HttpRequest.newBuilder()
