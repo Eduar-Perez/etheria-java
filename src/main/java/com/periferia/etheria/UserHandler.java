@@ -47,7 +47,7 @@ public class UserHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
 		DBConfig dataBaseConnection = new DBConfig();
 		UserRepositoryImpl userRepository = new UserRepositoryImpl(dataBaseConnection);
 		RecordRepositoryImpl recordRepository = new RecordRepositoryImpl(dataBaseConnection);
-		RecordUserRepositoryImpl recordUserRepositoryImpl = new RecordUserRepositoryImpl(dataBaseConnection);
+		RecordUserRepositoryImpl recordUserRepositoryImpl = new RecordUserRepositoryImpl(dataBaseConnection, recordRepository);
 		InstructionRepositoryImpl instructionRepositoryImpl = new  InstructionRepositoryImpl(dataBaseConnection);
 		JwtService jwtService = new JwtService(jwtSecret);
 		RecordServiceImpl recordService = new RecordServiceImpl(recordRepository, jwtService);
@@ -63,165 +63,180 @@ public class UserHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
 
 	@Override
 	public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
-	    try {
-	        Map<String, Object> body = mapper.readValue(request.getBody(), new TypeReference<>() {});
-	        String route = (String) body.get("action");
-	        Map<String, String> headers = request.getHeaders();
-	        String token = headers != null ? headers.get("Authorization") : null;
+		try {
+			Map<String, Object> body = mapper.readValue(request.getBody(), new TypeReference<>() {});
+			String route = (String) body.get("action");
+			Map<String, String> headers = request.getHeaders();
+			String token = headers != null ? headers.get("Authorization") : null;
 
-	        Response<?> response = switch (route) {
-	            case "register" -> handleRegister(body);
-	            case "login" -> handleLogin(body);
-	            case "queryAgent" -> handleQueryAgent(body, token);
-	            case "getRecords" -> handleGetRecords(body, token);
-	            case "instructions/general" -> handleInstruction(body, token);
-	            case "deleteHistory" -> handleDeleteHistory(body, token);
-	            default -> new Response<>(400, "Acción no válida", null);
-	        };
+			Response<?> response = switch (route) {
+			case "register" -> handleRegister(body);
+			case "login" -> handleLogin(body);
+			case "queryAgent" -> handleQueryAgent(body, token);
+			case "getRecords" -> handleGetRecords(body, token);
+			case "instructions/general" -> handleInstruction(body, token);
+			case "deleteHistory" -> handleDeleteHistory(body, token);
+			case "updateTitle" -> handleUpdateTitle(body, token);
+			default -> new Response<>(400, "Acción no válida", null);
+			};
 
-	        return buildResponse(response);
+			return buildResponse(response);
 
-	    } catch (UserException e) {
-	        log.error(Constants.ERROR_REQUEST, e);
-	        return buildErrorResponse(e.getErrorCode(), e.getErrorDetail());
-	    } catch (JsonProcessingException e) {
-	        log.error(Constants.ERROR_REQUEST, e);
-	        return buildErrorResponse(500, e.getMessage());
-	    }
+		} catch (UserException e) {
+			log.error(Constants.ERROR_REQUEST, e);
+			return buildErrorResponse(e.getErrorCode(), e.getErrorDetail());
+		} catch (JsonProcessingException e) {
+			log.error(Constants.ERROR_REQUEST, e);
+			return buildErrorResponse(500, e.getMessage());
+		}
+	}
+
+	private Response<?> handleUpdateTitle(Map<String, Object> body, String token) {
+		Map<String, String> data = mapper.convertValue(body.get("data"), new TypeReference<>() {});
+		if(isNullOrEmpty(data.get(Constants.ID)) || isNullOrEmpty(data.get(Constants.TITLE)) || token == null) {
+			log.error(Constants.RESPONSE_GENERIC + Constants.RESPONSE_REGISTER);
+			return new Response<>(400, Constants.RESPONSE_GENERIC + Constants.RESPONSE_REGISTER, null);
+		}
+		return recordServiceImpl.updateTitleRecord(Long.parseLong(data.get(Constants.ID)), data.get(Constants.TITLE), token);
 	}
 
 	private Response<?> handleRegister(Map<String, Object> body) {
-	    Map<String, String> data = mapper.convertValue(body.get("data"), new TypeReference<>() {});
-	    if (isNullOrEmpty(data.get(Constants.EMAIL)) || isNullOrEmpty(data.get(Constants.PASSWORD)) ||
-	        isNullOrEmpty(data.get(Constants.CC)) || isNullOrEmpty(data.get(Constants.ROLE))) {
-	        log.error(Constants.RESPONSE_GENERIC + Constants.RESPONSE_REGISTER);
-	        return new Response<>(400, Constants.RESPONSE_GENERIC + Constants.RESPONSE_REGISTER, null);
-	    }
+		Map<String, String> data = mapper.convertValue(body.get("data"), new TypeReference<>() {});
+		if (isNullOrEmpty(data.get(Constants.EMAIL)) || isNullOrEmpty(data.get(Constants.PASSWORD)) ||
+				isNullOrEmpty(data.get(Constants.CC)) || isNullOrEmpty(data.get(Constants.ROLE))) {
+			log.error(Constants.RESPONSE_GENERIC + Constants.RESPONSE_REGISTER);
+			return new Response<>(400, Constants.RESPONSE_GENERIC + Constants.RESPONSE_REGISTER, null);
+		}
 
-	    UserDto userDto = new UserDto(
-	        data.get(Constants.CC),
-	        data.get(Constants.FIRST_NAME),
-	        data.get(Constants.LAST_NAME),
-	        data.get(Constants.EMAIL),
-	        data.get(Constants.PASSWORD),
-	        data.get(Constants.ROLE)
-	    );
+		UserDto userDto = new UserDto(
+				data.get(Constants.CC),
+				data.get(Constants.FIRST_NAME),
+				data.get(Constants.LAST_NAME),
+				data.get(Constants.EMAIL),
+				data.get(Constants.PASSWORD),
+				data.get(Constants.ROLE)
+				);
 
-	    return userServiceImpl.registerUser(userDto);
+		return userServiceImpl.registerUser(userDto);
 	}
 
 	private Response<?> handleLogin(Map<String, Object> body) {
-	    Map<String, String> data = mapper.convertValue(body.get("data"), new TypeReference<>() {});
-	    if (isNullOrEmpty(data.get(Constants.EMAIL)) || isNullOrEmpty(data.get(Constants.PASSWORD))) {
-	        log.error(Constants.RESPONSE_GENERIC + Constants.RESPONSE_LOGIN);
-	        return new Response<>(400, Constants.RESPONSE_GENERIC + Constants.RESPONSE_LOGIN, null);
-	    }
+		Map<String, String> data = mapper.convertValue(body.get("data"), new TypeReference<>() {});
+		if (isNullOrEmpty(data.get(Constants.EMAIL)) || isNullOrEmpty(data.get(Constants.PASSWORD))) {
+			log.error(Constants.RESPONSE_GENERIC + Constants.RESPONSE_LOGIN);
+			return new Response<>(400, Constants.RESPONSE_GENERIC + Constants.RESPONSE_LOGIN, null);
+		}
 
-	    UserDto userDto = new UserDto(
-	        data.get(Constants.CC),
-	        data.get(Constants.FIRST_NAME),
-	        data.get(Constants.LAST_NAME),
-	        data.get(Constants.EMAIL),
-	        data.get(Constants.PASSWORD),
-	        data.get(Constants.ROLE)
-	    );
+		UserDto userDto = new UserDto(
+				data.get(Constants.CC),
+				data.get(Constants.FIRST_NAME),
+				data.get(Constants.LAST_NAME),
+				data.get(Constants.EMAIL),
+				data.get(Constants.PASSWORD),
+				data.get(Constants.ROLE)
+				);
 
-	    return userServiceImpl.loginUser(userDto);
+		return userServiceImpl.loginUser(userDto);
 	}
 
 	private Response<?> handleQueryAgent(Map<String, Object> body, String token) {
-	    Map<String, Object> data = mapper.convertValue(body.get("data"), new TypeReference<>() {});
-	    if (data.get(Constants.MODEL) == null || data.get(Constants.QUESTION) == null ||
-	        data.get(Constants.CC) == null || token == null) {
-	        log.error(Constants.RESPONSE_GENERIC + Constants.RESPONSE_QUERYAGENT);
-	        return new Response<>(400, Constants.RESPONSE_GENERIC + Constants.RESPONSE_QUERYAGENT, null);
-	    }
+		Map<String, Object> data = mapper.convertValue(body.get("data"), new TypeReference<>() {});
+		if (data.get(Constants.MODEL) == null || data.get(Constants.QUESTION) == null ||
+				data.get(Constants.CC) == null || token == null) {
+			log.error(Constants.RESPONSE_GENERIC + Constants.RESPONSE_QUERYAGENT);
+			return new Response<>(400, Constants.RESPONSE_GENERIC + Constants.RESPONSE_QUERYAGENT, null);
+		}
 
-	    List<FilesDto> files = Optional.ofNullable(data.get(Constants.FILE))
-	            .map(obj -> mapper.convertValue(obj, new TypeReference<List<FilesDto>>() {}))
-	            .orElse(new ArrayList<>());
+		List<FilesDto> files = Optional.ofNullable(data.get(Constants.FILES))
+				.map(obj -> mapper.convertValue(obj, new TypeReference<List<FilesDto>>() {}))
+				.orElse(new ArrayList<>());
+		List<InstructionDto> instructions = Optional.ofNullable(data.get(Constants.INSTRUCTIONS))
+				.map(obj -> mapper.convertValue(obj, new TypeReference<List<InstructionDto>>() {}))
+				.orElse(new ArrayList<>());
 
-	    QueryAgentDto dto = new QueryAgentDto();
-	    dto.setModel((String) data.get(Constants.MODEL));
-	    dto.setAgentId((String) data.get(Constants.AGENT));
-	    dto.setQuestion((String) data.get(Constants.QUESTION));
-	    dto.setUuid((String) data.get(Constants.UUID));
-	    dto.setCedula((String) data.get(Constants.CC));
-	    dto.setFiles(files);
+		QueryAgentDto dto = new QueryAgentDto();
+		dto.setModel((String) data.get(Constants.MODEL));
+		dto.setAgentId((String) data.get(Constants.AGENT));
+		dto.setQuestion((String) data.get(Constants.QUESTION));
+		dto.setUuid((String) data.get(Constants.UUID));
+		dto.setCedula((String) data.get(Constants.CC));
+		dto.setTitle((String) data.get(Constants.TITLE));
+		dto.setFiles(files);
+		dto.setInstructions(instructions);
 
-	    return agentQueryService.requestQuery(token, dto);
+		return agentQueryService.requestQuery(token, dto);
 	}
 
 	private Response<?> handleGetRecords(Map<String, Object> body, String token) {
-	    Map<String, String> data = mapper.convertValue(body.get("data"), new TypeReference<>() {});
-	    if (isNullOrEmpty(data.get(Constants.CC)) || token == null) {
-	        log.error(Constants.RESPONSE_GENERIC + Constants.RESPONSE_QUERYAGENT);
-	        return new Response<>(400, Constants.RESPONSE_GENERIC + Constants.RESPONSE_QUERYAGENT, null);
-	    }
-	    return recordServiceImpl.consultRecords(data.get(Constants.CC), token);
+		Map<String, String> data = mapper.convertValue(body.get("data"), new TypeReference<>() {});
+		if (isNullOrEmpty(data.get(Constants.CC)) || token == null) {
+			log.error(Constants.RESPONSE_GENERIC + Constants.RESPONSE_QUERYAGENT);
+			return new Response<>(400, Constants.RESPONSE_GENERIC + Constants.RESPONSE_QUERYAGENT, null);
+		}
+		return recordServiceImpl.consultRecords(data.get(Constants.CC), token);
 	}
 
 	private Response<?> handleInstruction(Map<String, Object> body, String token) {
-	    Map<String, String> data = mapper.convertValue(body.get("data"), new TypeReference<>() {});
-	    if (isNullOrEmpty(data.get(Constants.ID_USER)) || isNullOrEmpty(data.get(Constants.ACTION))) {
-	        return new Response<>(400, Constants.RESPONSE_GENERIC + Constants.RESPONSE_REGISTER, null);
-	    }
+		Map<String, String> data = mapper.convertValue(body.get("data"), new TypeReference<>() {});
+		if (isNullOrEmpty(data.get(Constants.ID_USER)) || isNullOrEmpty(data.get(Constants.ACTION))) {
+			return new Response<>(400, Constants.RESPONSE_GENERIC + Constants.RESPONSE_REGISTER, null);
+		}
 
-	    InstructionDto instructionDto = new InstructionDto();
-	    if (data.get(Constants.ID) != null) instructionDto.setId(Long.parseLong(data.get(Constants.ID)));
-	    instructionDto.setName(data.get(Constants.NAME));
-	    instructionDto.setDescription(data.get(Constants.DESCRIPTION));
-	    instructionDto.setInstruction(data.get(Constants.INSTRUCTION));
-	    instructionDto.setGeneral(Boolean.parseBoolean(data.get(Constants.GENERAL)));
-	    instructionDto.setIdUser(data.get(Constants.ID_USER));
-	    instructionDto.setAction(data.get(Constants.ACTION));
+		InstructionDto instructionDto = new InstructionDto();
+		if (data.get(Constants.ID) != null) instructionDto.setId(Long.parseLong(data.get(Constants.ID)));
+		instructionDto.setName(data.get(Constants.NAME));
+		instructionDto.setDescription(data.get(Constants.DESCRIPTION));
+		instructionDto.setInstruction(data.get(Constants.INSTRUCTION));
+		instructionDto.setGeneral(Boolean.parseBoolean(data.get(Constants.GENERAL)));
+		instructionDto.setIdUser(data.get(Constants.ID_USER));
+		instructionDto.setAction(data.get(Constants.ACTION));
 
-	    return instructionService.interactueInstruction(instructionDto, token);
+		return instructionService.interactueInstruction(instructionDto, token);
 	}
 
 	private Response<?> handleDeleteHistory(Map<String, Object> body, String token) {
-	    Map<String, String> data = mapper.convertValue(body.get("data"), new TypeReference<>() {});
-	    if (data.get("id") == null || token == null) {
-	        log.error(Constants.RESPONSE_GENERIC + Constants.RESPONSE_DELETE);
-	        return new Response<>(400, Constants.RESPONSE_GENERIC + Constants.RESPONSE_DELETE, null);
-	    }
-	    return recordServiceImpl.deleteRecord(data.get("id"), token);
+		Map<String, String> data = mapper.convertValue(body.get("data"), new TypeReference<>() {});
+		if (data.get("id") == null || token == null) {
+			log.error(Constants.RESPONSE_GENERIC + Constants.RESPONSE_DELETE);
+			return new Response<>(400, Constants.RESPONSE_GENERIC + Constants.RESPONSE_DELETE, null);
+		}
+		return recordServiceImpl.deleteRecord(data.get("id"), token);
 	}
 
 	private APIGatewayProxyResponseEvent buildResponse(Response<?> response) {
-	    return new APIGatewayProxyResponseEvent()
-	        .withStatusCode(response.getStatusCode())
-	        .withHeaders(Map.of(
-	            Constants.CONTENT_TYPE, Constants.RESPONSE_CONTENT_TYPE,
-	            Constants.ACCES_CONTROL_ALLOW_ORIGIN, Constants.RESPONSE_ACCES_CONTROL_ALLOW_ORIGIN,
-	            Constants.ACCES_CONTROL_ALLOW_METHODS, Constants.RESPONSE_CONTROL_ALLOW_METHODS,
-	            Constants.ACCES_CONTROL_ALLOW_HEADERS, Constants.RESPONSE_CONTROL_ALLOW_HEADERS
-	        ))
-	        .withBody(toJson(response));
+		return new APIGatewayProxyResponseEvent()
+				.withStatusCode(response.getStatusCode())
+				.withHeaders(Map.of(
+						Constants.CONTENT_TYPE, Constants.RESPONSE_CONTENT_TYPE,
+						Constants.ACCES_CONTROL_ALLOW_ORIGIN, Constants.RESPONSE_ACCES_CONTROL_ALLOW_ORIGIN,
+						Constants.ACCES_CONTROL_ALLOW_METHODS, Constants.RESPONSE_CONTROL_ALLOW_METHODS,
+						Constants.ACCES_CONTROL_ALLOW_HEADERS, Constants.RESPONSE_CONTROL_ALLOW_HEADERS
+						))
+				.withBody(toJson(response));
 	}
 
 	private APIGatewayProxyResponseEvent buildErrorResponse(int statusCode, String message) {
-	    return new APIGatewayProxyResponseEvent()
-	        .withStatusCode(statusCode)
-	        .withHeaders(Map.of(
-	            Constants.ACCES_CONTROL_ALLOW_ORIGIN, Constants.RESPONSE_ACCES_CONTROL_ALLOW_ORIGIN,
-	            Constants.ACCES_CONTROL_ALLOW_METHODS, Constants.RESPONSE_CONTROL_ALLOW_METHODS,
-	            Constants.ACCES_CONTROL_ALLOW_HEADERS, Constants.RESPONSE_CONTROL_ALLOW_HEADERS
-	        ))
-	        .withBody("{\"error\":\"Error interno: " + message + "\"}");
+		return new APIGatewayProxyResponseEvent()
+				.withStatusCode(statusCode)
+				.withHeaders(Map.of(
+						Constants.ACCES_CONTROL_ALLOW_ORIGIN, Constants.RESPONSE_ACCES_CONTROL_ALLOW_ORIGIN,
+						Constants.ACCES_CONTROL_ALLOW_METHODS, Constants.RESPONSE_CONTROL_ALLOW_METHODS,
+						Constants.ACCES_CONTROL_ALLOW_HEADERS, Constants.RESPONSE_CONTROL_ALLOW_HEADERS
+						))
+				.withBody("{\"error\":\"Error interno: " + message + "\"}");
 	}
 
 	private String toJson(Object object) {
-	    try {
-	        return mapper.writeValueAsString(object);
-	    } catch (JsonProcessingException e) {
-	        log.error("Error serializando JSON", e);
-	        return "{}";
-	    }
+		try {
+			return mapper.writeValueAsString(object);
+		} catch (JsonProcessingException e) {
+			log.error("Error serializando JSON", e);
+			return "{}";
+		}
 	}
 
 	private boolean isNullOrEmpty(String value) {
-	    return value == null || value.trim().isEmpty();
+		return value == null || value.trim().isEmpty();
 	}
 
 }

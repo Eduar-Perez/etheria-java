@@ -1,10 +1,12 @@
 package com.periferia.etheria.repository;
 
 import com.periferia.etheria.entity.RecordUserEntity;
+import com.periferia.etheria.entity.TitleRecordEntity;
 
 public interface RecordUserRepository {
 
-	public boolean existByIdRecordUser(String cedula);
-	public RecordUserEntity saveRecordUserEntity(Long idRecord, String cedula);
+	public TitleRecordEntity getTitleRecord(String title, String idUser);
+	public TitleRecordEntity saveTitleRecordEntity(String title, String idUser, String uuid, String question, String response);
+	public RecordUserEntity saveRecordUser(Long idRecord, Long titleRecord);
 	
 }

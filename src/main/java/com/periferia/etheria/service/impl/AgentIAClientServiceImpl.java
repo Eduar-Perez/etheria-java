@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.periferia.etheria.constants.Constants;
 import com.periferia.etheria.dto.FilesDto;
+import com.periferia.etheria.dto.InstructionDto;
 import com.periferia.etheria.exception.UserException;
 import com.periferia.etheria.service.AgentIAClientService;
 
@@ -27,7 +28,7 @@ public class AgentIAClientServiceImpl implements AgentIAClientService {
 			.build();
 
 	@Override
-	public String sendQuestionToAgent(String question, String model, String agent, List<FilesDto> fileBase64) {
+	public String sendQuestionToAgent(String question, String model, String agent, List<FilesDto> fileBase64, List<InstructionDto> instructions) {
 		log.info(Thread.currentThread().getStackTrace()[1].getMethodName());
 
 		try {
@@ -46,11 +47,19 @@ public class AgentIAClientServiceImpl implements AgentIAClientService {
 			}
 			requestBody.set("files", filesArray);
 
+			ArrayNode instructionsArray = mapper.createArrayNode();
+			for(InstructionDto instruction: instructions) {
+				ObjectNode instructionObject = mapper.createObjectNode();
+				instructionObject.put("intruction", instruction.getInstruction());
+				instructionObject.put("description", instruction.getDescription());
+				instructionsArray.add(instructionObject);
+			}
+			requestBody.set("instructions", instructionsArray);
 			String body = mapper.writeValueAsString(requestBody);
 
 			HttpRequest request = HttpRequest.newBuilder()
 					.uri(URI.create(System.getenv(Constants.ENDPOINT_AGENTIA)))
-					.timeout(Duration.ofSeconds(30))
+					.timeout(Duration.ofSeconds(35))
 					.header("Accept", Constants.RESPONSE_CONTENT_TYPE)
 					.POST(HttpRequest.BodyPublishers.ofString(body))
 					.build();

@@ -5,13 +5,14 @@ import java.util.List;
 
 import com.periferia.etheria.constants.Constants;
 import com.periferia.etheria.dto.RecordDto;
-import com.periferia.etheria.entity.RecordEntity;
+import com.periferia.etheria.dto.TitleRecordDto;
 import com.periferia.etheria.exception.UserException;
 import com.periferia.etheria.repository.RecordRepository;
 import com.periferia.etheria.security.JwtService;
 import com.periferia.etheria.service.RecordService;
 import com.periferia.etheria.util.RecordUtil;
 import com.periferia.etheria.util.Response;
+import com.periferia.etheria.util.TitleRecordUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,13 +28,13 @@ public class RecordServiceImpl implements RecordService {
 	}
 
 	@Override
-	public Response<?> consultRecords(String cedula, String token) {
+	public Response<List<TitleRecordDto>> consultRecords(String cedula, String token) {
 		log.info(Constants.LOGIN_SERVICE, Thread.currentThread().getStackTrace()[1].getMethodName());
-		List<RecordDto> response = new ArrayList<>();
+		List<TitleRecordDto> response = new ArrayList<>();
 		try {
 			token = token.substring(7);
 			if(Boolean.TRUE.equals(jwtService.validateToken(token)))
-				response = RecordUtil.convertEntityToDtoList(recordRepository.getRecords(cedula));
+				response = TitleRecordUtil.convertTitleRecordEntityListToDtoList(recordRepository.getRecords(cedula));
 			else
 				throw new UserException("Contraseña incorrecta: ", 400, Constants.ERROR_CONTRASENA);
 		} catch (Exception e) {
@@ -45,11 +46,11 @@ public class RecordServiceImpl implements RecordService {
 	}
 
 	@Override
-	public RecordDto saveRecord(String question, String response, String uuid) {
+	public RecordDto saveRecord(String question, String response) {
 		log.info(Constants.LOGIN_SERVICE, Thread.currentThread().getStackTrace()[1].getMethodName());
 		try {
 			if(question != null) {				
-				return RecordUtil.convertEntityToDto(recordRepository.saveRecords(question, response, uuid));
+				return RecordUtil.convertEntityToDto(recordRepository.saveRecords(question, response));
 			}
 			else { 
 				throw new UserException(Constants.DATA_OBLIGATORIA, 400, "El texto y la cédula con obligatorios");
@@ -61,19 +62,19 @@ public class RecordServiceImpl implements RecordService {
 	}
 
 	@Override
-	public Response<Boolean> deleteRecord(String id, String token) {
+	public Response<Boolean> deleteRecord(String uuid, String token) {
 		log.info(Constants.LOGIN_SERVICE, Thread.currentThread().getStackTrace()[1].getMethodName());
 		try {
 			token = token.substring(7);
 			if(Boolean.TRUE.equals(jwtService.validateToken(token))) {
-				if(!recordRepository.existByModule(id)) {
+				if(!recordRepository.existByModule(uuid)) {
 					return new Response<>(200, "El registro a eliminar no se encuentra en la base de datos", false);
 				}
-				recordRepository.deleteById(id);
+				recordRepository.deleteById(uuid);
 				return new Response<>(200, "Historial eliminado con exito", true);
 			}
 			else {
-				throw new UserException("Contraseña incorrecta: ", 400, Constants.ERROR_CONTRASENA);
+				return new Response<>(401, "Token no valido para la sesión", null);
 			}
 		} catch (UserException e) {
 			log.error(Constants.ERROR_DELETE_RECORDS + e.getMessage());
@@ -82,10 +83,17 @@ public class RecordServiceImpl implements RecordService {
 	}
 
 	@Override
-	public void updateRecord(RecordEntity recordEntity) {
+	public Response<TitleRecordDto> updateTitleRecord(Long id, String title, String token) {
 		log.info(Constants.LOGIN_SERVICE, Thread.currentThread().getStackTrace()[1].getMethodName());
 		try {
-			recordRepository.updateRecord(recordEntity);
+			token = token.substring(7);
+			if(Boolean.TRUE.equals(jwtService.validateToken(token))) {
+				TitleRecordDto response = TitleRecordUtil.convertTitleRecordEntityToDto(recordRepository.updateTitleRecord(id, title));
+				return new Response<>(200, "Registro actualizado con exito: ", response);
+			}
+			else {
+				return new Response<>(401, "Token no valido para la sesión", null);			
+			}
 		} catch (Exception e) {
 			log.error(Constants.ERROR_UPDATE_RECORDS + e.getMessage());
 			throw new UserException(Constants.ERROR_UPDATE_RECORDS + e.getMessage(), 500, e.getMessage());

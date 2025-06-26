@@ -3,11 +3,12 @@ package com.periferia.etheria.entity;
 import lombok.Getter;
 import lombok.Setter;
 
-@Setter
 @Getter
-public class RecordEntity {
-
+@Setter
+public class RecordUserEntity {
+	
 	private Long id;
-	private String question;
-	private String response;
+	private Long idRecord;
+	private String idTitleRecord;
+
 }

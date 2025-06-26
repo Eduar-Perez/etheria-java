@@ -22,8 +22,6 @@ public class RecordUtil {
 		recordEntity.setId(recordDto.getId());
 		recordEntity.setQuestion(recordDto.getQuestion());
 		recordEntity.setResponse(recordDto.getResponse());
-		recordEntity.setUuid(recordDto.getUuid());
-		recordEntity.setDateCreate(recordDto.getDateCreate());
 
 		return recordEntity;
 	}
@@ -31,12 +29,10 @@ public class RecordUtil {
 	public static List<RecordDto> convertEntityToDtoList(List<RecordEntity> recordEntityList) {
 		List<RecordDto> response = new ArrayList<>();
 		for(RecordEntity recordEntity : recordEntityList) {
-			RecordDto recordDto = new RecordDto(null, null, null, null, null);
+			RecordDto recordDto = new RecordDto(null, null, null);
 			recordDto.setId(recordEntity.getId()); 
 			recordDto.setQuestion(recordEntity.getQuestion());
 			recordDto.setResponse(recordEntity.getResponse());
-			recordDto.setDateCreate(recordEntity.getDateCreate());
-			recordDto.setUuid(recordEntity.getUuid());
 			response.add(recordDto);
 		}
 
@@ -47,9 +43,7 @@ public class RecordUtil {
 		return new RecordDto(
 				recordEntity.getId(), 
 				recordEntity.getQuestion(), 
-				recordEntity.getResponse(), 
-				recordEntity.getDateCreate(), 
-				recordEntity.getUuid());
+				recordEntity.getResponse());
 	}
 
 }

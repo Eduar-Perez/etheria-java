@@ -1,17 +1,17 @@
 package com.periferia.etheria.repository;
 
 import java.util.List;
-
 import com.periferia.etheria.entity.RecordEntity;
+import com.periferia.etheria.entity.TitleRecordEntity;
 
 public interface RecordRepository {
 
-	public List<RecordEntity> getRecords(String cedula);
+	public List<TitleRecordEntity> getRecords(String cedula);
 	public RecordEntity getRecord(Long id);
-	public RecordEntity saveRecords(String text, String cedula, String uuid);
-	public boolean existById(String cedula);
-	public void deleteById(String id);
-	public void updateRecord(RecordEntity recordEntity);
+	public RecordEntity saveRecords(String question, String response);
+	public boolean existById(String uuid);
+	public void deleteById(String uuid);
+	public TitleRecordEntity updateTitleRecord(Long id, String title);
 	public boolean existByModule(String uuid);
 	
 }

@@ -57,23 +57,25 @@ public class Constants {
 	public static final String MODEL = "model";
 	public static final String AGENT = "agent_id";
 	public static final String UUID = "uuid";
+	public static final String TITLE = "title";
 	public static final String CC = "cedula";
 	public static final String FIRST_NAME = "firstName";
 	public static final String LAST_NAME = "lastName";
 	public static final String EMAIL = "email";
 	public static final String PASSWORD = "password";
-	public static final Object FILE = "files";
-	public static final Object ROLE = "role";
+	public static final String FILES = "files";
+	public static final String INSTRUCTIONS = "instructions";
+	public static final String ROLE = "role";
 
 	//Object-instruction
-	public static final Object ID = "id";
-	public static final Object NAME = "name";
-	public static final Object INSTRUCTION = "instruction";
-	public static final Object DESCRIPTION = "description";
-	public static final Object GENERAL = "general";
-	public static final Object ID_USER = "idUser";
-	public static final Object ACTION = "action";
-
+	public static final String ID = "id";
+	public static final String NAME = "name";
+	public static final String INSTRUCTION = "instruction";
+	public static final String DESCRIPTION = "description";
+	public static final String GENERAL = "general";
+	public static final String ID_USER = "idUser";
+	public static final String ACTION = "action";
+	
 	//Logs-Service
 	public static final String LOGIN_SERVICE = "Ingresa al servicio de: {}";
 	public static final String LOGIN_SQL = "Ingresa a la consulta de: {}";
