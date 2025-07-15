@@ -20,6 +20,7 @@ import com.periferia.etheria.repository.impl.RecordRepositoryImpl;
 import com.periferia.etheria.repository.impl.RecordUserRepositoryImpl;
 import com.periferia.etheria.repository.impl.UserRepositoryImpl;
 import com.periferia.etheria.security.JwtService;
+import com.periferia.etheria.security.LdapService;
 import com.periferia.etheria.service.AgentQueryService;
 import com.periferia.etheria.service.impl.AgentIAClientServiceImpl;
 import com.periferia.etheria.service.impl.AgentQueryServiceImpl;
@@ -52,10 +53,11 @@ public class UserHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
 		JwtService jwtService = new JwtService(jwtSecret);
 		RecordServiceImpl recordService = new RecordServiceImpl(recordRepository, jwtService);
 		AgentIAClientServiceImpl agenClient = new AgentIAClientServiceImpl();
+		LdapService ldapService = new LdapService();
 
 		this.mapper.registerModule(new JavaTimeModule());
 		this.mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-		this.userServiceImpl = new UserServiceImpl(userRepository, jwtService);
+		this.userServiceImpl = new UserServiceImpl(userRepository, jwtService, ldapService);
 		this.agentQueryService = new AgentQueryServiceImpl(jwtService, recordService, recordUserRepositoryImpl, agenClient);
 		this.recordServiceImpl = new RecordServiceImpl(recordRepository, jwtService);
 		this.instructionService = new InstructionServiceImpl(instructionRepositoryImpl, jwtService);
@@ -114,8 +116,9 @@ public class UserHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
 				data.get(Constants.LAST_NAME),
 				data.get(Constants.EMAIL),
 				data.get(Constants.PASSWORD),
-				data.get(Constants.ROLE)
-				);
+				data.get(Constants.ROLE),
+				data.get(Constants.IMAGE),
+				data.get(Constants.AUTHTYPE));
 
 		return userServiceImpl.registerUser(userDto);
 	}
@@ -133,8 +136,9 @@ public class UserHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
 				data.get(Constants.LAST_NAME),
 				data.get(Constants.EMAIL),
 				data.get(Constants.PASSWORD),
-				data.get(Constants.ROLE)
-				);
+				data.get(Constants.ROLE),
+				data.get(Constants.IMAGE),
+				data.get(Constants.AUTHTYPE));
 
 		return userServiceImpl.loginUser(userDto);
 	}
@@ -161,6 +165,7 @@ public class UserHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
 		dto.setUuid((String) data.get(Constants.UUID));
 		dto.setCedula((String) data.get(Constants.CC));
 		dto.setTitle((String) data.get(Constants.TITLE));
+		dto.setTools((Boolean) data.get(Constants.TOOLS));
 		dto.setFiles(files);
 		dto.setInstructions(instructions);
 

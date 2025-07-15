@@ -10,5 +10,6 @@ public interface InstructionRepository {
 	public void createInstruction(InstructionEntity instruction);
 	public void updateInstruction(InstructionEntity instruction);
 	public List<InstructionEntity> getInstructions(String idUser);
+	public List<InstructionEntity> getInstructionsGeneral(List<InstructionEntity> instructionsResponse);
 
 }

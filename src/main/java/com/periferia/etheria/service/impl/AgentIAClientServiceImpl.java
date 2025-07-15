@@ -28,7 +28,7 @@ public class AgentIAClientServiceImpl implements AgentIAClientService {
 			.build();
 
 	@Override
-	public String sendQuestionToAgent(String question, String model, String agent, List<FilesDto> fileBase64, List<InstructionDto> instructions) {
+	public String sendQuestionToAgent(String question, String model, String agent, Boolean tools , List<FilesDto> fileBase64, List<InstructionDto> instructions) {
 		log.info(Thread.currentThread().getStackTrace()[1].getMethodName());
 
 		try {
@@ -37,6 +37,7 @@ public class AgentIAClientServiceImpl implements AgentIAClientService {
 			requestBody.put("question", question);
 			requestBody.put("model", model);
 			requestBody.put("agent_id", agent);
+			requestBody.put("tool", tools);
 
 			ArrayNode filesArray = mapper.createArrayNode();
 			for(FilesDto fileDto: fileBase64) {
@@ -94,12 +95,7 @@ public class AgentIAClientServiceImpl implements AgentIAClientService {
 				throw new UserException("No se encontró el nodo 'response' en la respuesta del agente IA", 500, "");
 			}
 
-			JsonNode contentNode = responseNode.get("content");
-			if (contentNode == null || contentNode.isNull()) {
-				throw new UserException("No se encontró el nodo 'content' dentro de 'response'", 500, "");
-			}
-
-			return contentNode.asText();
+			return responseNode.asText();
 		} catch (Exception e) {
 			throw new UserException("Error al extraer la respuesta del agente IA", 500, e.getMessage());
 		}

@@ -19,14 +19,18 @@ public class UserDto {
 	private String password;
 	private String token;
 	private String role;
+	private String image;
+	private String authType;
 	private List<RecordDto> recordDto;
 
-	public UserDto(String cedula, String firstName, String lastName, String email, String password, String role) {
+	public UserDto(String cedula, String firstName, String lastName, String email, String password, String role, String image, String authType) {
 		this.cedula = cedula;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
 		this.password = password;
 		this.role = role;
+		this.image = image;
+		this.authType = authType;
 	}
 }

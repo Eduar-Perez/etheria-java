@@ -148,8 +148,35 @@ public class InstructionRepositoryImpl implements InstructionRepository{
 		} catch (SQLException e) {
 			throw new UserException(Constants.ERROR_SQL_GET_UPDATE + e.getMessage(), 400, e.getMessage());
 		}
-
+		getInstructionsGeneral(instructionsResponse);
 		return instructionsResponse;
 
+	}
+
+	@Override
+	public List<InstructionEntity> getInstructionsGeneral(List<InstructionEntity> instructionsResponse) {
+		log.info(Constants.LOGIN_SQL, Thread.currentThread().getStackTrace()[1].getMethodName());
+		StringBuilder stringBuilder = new StringBuilder(ConstantsSql.VAR_SENTENCIA_SQL_GET_INSTRUCTION_GENERAL.getValue());
+
+		try(Connection connection = dataBaseConnection.getConnection();
+				PreparedStatement preparedStatement = connection.prepareStatement(stringBuilder.toString())) {
+			preparedStatement.setBoolean(1, true);
+			ResultSet resultSet = preparedStatement.executeQuery();
+
+			while (resultSet.next()) {
+				InstructionEntity instructionResponse = new InstructionEntity();
+				instructionResponse.setId(resultSet.getLong("id"));
+				instructionResponse.setDescription(resultSet.getString("description"));
+				instructionResponse.setInstruction(resultSet.getString("instruction"));
+				instructionResponse.setGeneral(resultSet.getBoolean("general"));
+				instructionResponse.setName(resultSet.getString("name"));
+				instructionResponse.setIdUser(resultSet.getString("id_user"));
+				instructionsResponse.add(instructionResponse);
+			}
+
+		} catch (SQLException e) {
+			throw new UserException(Constants.ERROR_SQL_GET_UPDATE + e.getMessage(), 400, e.getMessage());
+		}
+		return instructionsResponse;
 	}
 }

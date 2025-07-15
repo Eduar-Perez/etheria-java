@@ -7,6 +7,6 @@ import com.periferia.etheria.dto.InstructionDto;
 
 public interface AgentIAClientService {
 
-	public String sendQuestionToAgent(String questiong, String model, String agent, List<FilesDto> fileBase64, List<InstructionDto> instructions);
+	public String sendQuestionToAgent(String questiong, String model, String agent, Boolean tools, List<FilesDto> fileBase64, List<InstructionDto> instructions);
 
 }

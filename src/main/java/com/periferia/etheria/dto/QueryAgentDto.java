@@ -17,6 +17,7 @@ public class QueryAgentDto {
 	private String uuid;
 	private String cedula;
 	private String title;
+	private Boolean tools;
 	private List<FilesDto> files;
 	private List<InstructionDto> instructions;
 	

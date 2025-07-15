@@ -66,6 +66,10 @@ public class Constants {
 	public static final String FILES = "files";
 	public static final String INSTRUCTIONS = "instructions";
 	public static final String ROLE = "role";
+	public static final String IMAGE = "image";
+	public static final String AUTHTYPE = "authType";
+	public static final String TOOLS = "tools";
+	
 
 	//Object-instruction
 	public static final String ID = "id";
@@ -101,7 +105,7 @@ public class Constants {
 	//Model_agent 
 	protected static final Map<String, String> modelsAgents = new HashMap<>();
 	static {
-		modelsAgents.put("claud-agent", "us.anthropic.claude-3-7-sonnet-20250219-v1:0");
+		modelsAgents.put("claude-agent", "us.anthropic.claude-3-7-sonnet-20250219-v1:0");
 		modelsAgents.put("web-agent", "us.anthropic.claude-3-7-sonnet-20250219-v1:0");
 		modelsAgents.put("agno-assist", "us.anthropic.claude-3-7-sonnet-20250219-v1:0");
 		modelsAgents.put("finance-agent", "us.anthropic.claude-3-7-sonnet-20250219-v1:0");

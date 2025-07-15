@@ -1,9 +1,11 @@
 package com.periferia.etheria.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.periferia.etheria.constants.Constants;
 import com.periferia.etheria.dto.InstructionDto;
+import com.periferia.etheria.entity.InstructionEntity;
 import com.periferia.etheria.exception.UserException;
 import com.periferia.etheria.repository.InstructionRepository;
 import com.periferia.etheria.security.JwtService;
@@ -69,7 +71,14 @@ public class InstructionServiceImpl implements InstructionService{
 	private Boolean createInstruction(InstructionDto instructionDto) {
 		log.info(Constants.LOGIN_SERVICE, Thread.currentThread().getStackTrace()[1].getMethodName());
 		try {
-			instructionRepository.createInstruction(InstructionUtil.convertDtoToEntity(instructionDto));
+			List<InstructionEntity> instructionsGenerals = new ArrayList<>();
+			instructionRepository.getInstructionsGeneral(instructionsGenerals);
+			instructionsGenerals.forEach(instructionGeneral -> {
+				if(instructionGeneral.getName().equals(instructionDto.getName()))
+					throw new UserException("la instrucción con el nombre " +  instructionDto.getName() + 
+							" Ya existe en las instucciones generales", 400, null);
+			});
+			instructionRepository.createInstruction(InstructionUtil.convertDtoToEntity(instructionDto));				
 			return true;
 		} catch (Exception e) {
 			throw new UserException("Error creando la instrucción: " + e.getMessage(), 500, e.getMessage());

@@ -44,8 +44,8 @@ public class AgentQueryServiceImpl implements AgentQueryService {
 			Map<String, String> modelsAgents = Constants.getModelsAgents();
 			token = token.substring(7);
 			if(Boolean.TRUE.equals(jwtService.validateToken(token))) {
-				String response = agentClient.sendQuestionToAgent(queryAgentDto.getQuestion(), modelsAgents.get(queryAgentDto.getModel()),
-						queryAgentDto.getAgentId(), queryAgentDto.getFiles(), queryAgentDto.getInstructions());
+				String response = agentClient.sendQuestionToAgent(queryAgentDto.getQuestion(), modelsAgents.get(queryAgentDto.getModel()), queryAgentDto.getAgentId(), queryAgentDto.getTools(), 
+						queryAgentDto.getFiles(), queryAgentDto.getInstructions());
 
 				TitleRecordEntity titleRecordEntity = recordUserRepository.getTitleRecord(queryAgentDto.getUuid(), queryAgentDto.getCedula());
 				if(titleRecordEntity.getTitle() == null) {
