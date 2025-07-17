@@ -60,7 +60,7 @@ public class AgentIAClientServiceImpl implements AgentIAClientService {
 
 			HttpRequest request = HttpRequest.newBuilder()
 					.uri(URI.create(System.getenv(Constants.ENDPOINT_AGENTIA)))
-					.timeout(Duration.ofSeconds(35))
+					.timeout(Duration.ofSeconds(180))
 					.header("Accept", Constants.RESPONSE_CONTENT_TYPE)
 					.POST(HttpRequest.BodyPublishers.ofString(body))
 					.build();
