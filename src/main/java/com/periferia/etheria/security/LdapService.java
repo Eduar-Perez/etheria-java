@@ -1,20 +1,13 @@
 package com.periferia.etheria.security;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
-import javax.naming.AuthenticationException;
-import javax.naming.CommunicationException;
-import javax.naming.Context;
-import javax.naming.NameNotFoundException;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
-import javax.naming.directory.Attribute;
-import javax.naming.directory.Attributes;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
-import javax.naming.directory.SearchControls;
-import javax.naming.directory.SearchResult;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.periferia.etheria.constants.Constants;
 import com.periferia.etheria.exception.UserException;
 import lombok.extern.slf4j.Slf4j;
@@ -22,65 +15,73 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class LdapService {
 
-	public Map<String, String> authenticate(String email, String password) {
+	private static final String TENANT_ID = "TU_TENANT_ID"; //Identificador del directorio Entra ID de la empresa
+	private static final String CLIENT_ID = "TU_CLIENT_ID"; //	ID de la aplicación registrada que usarás para acceder
+	private static final String CLIENT_SECRET = "TU_CLIENT_SECRET"; // Secreto de autenticación (tipo contraseña de app)
+	private static final String TOKEN_ENDPOINT = "https://login.microsoftonline.com/" + TENANT_ID + "/oauth2/v2.0/token";
+	private static final String GRAPH_API_URL = "https://graph.microsoft.com/v1.0/users/"; //Endpoint de graph API fija para todos los TENANT_ID Se debe agregar a la url el {email}
+	private static final HttpClient httpClient = HttpClient.newHttpClient();
+	private static final ObjectMapper objectMapper = new ObjectMapper();
+
+	public Map<String, String> authenticate(String email) {
 		log.info(Constants.LOGIN_SERVICE, Thread.currentThread().getStackTrace()[1].getMethodName());
 
-		String identifyingAttribute = "sAMAccountName";
-		String[] attributesToReturn = {"sn", "mail", "givenName", "sn", "employeeID"};
-
-		Properties environment = new Properties();
-		environment.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-		environment.put(Context.PROVIDER_URL, "");
-		environment.put(Context.SECURITY_AUTHENTICATION, "simple");
-
 		try {
-			DirContext dirContext = new InitialDirContext(environment);
+			String accessToken = obtenerAccessToken();
 
-			SearchControls searchControl = new SearchControls();
-			searchControl.setReturningAttributes(new String [0]);
-			searchControl.setSearchScope(SearchControls.SUBTREE_SCOPE);
-			String searchFilter	 = "(" + identifyingAttribute + "=" + email + ")";  
-			NamingEnumeration<SearchResult> results = dirContext.search("", searchFilter, searchControl);
+			HttpRequest request = HttpRequest.newBuilder()
+					.uri(URI.create(GRAPH_API_URL + email))
+					.header("Authorization", "Bearer " + accessToken)
+					.header("Accept", "application/json")
+					.GET()
+					.build();
 
-			if (!results.hasMore()) {
-				dirContext.close();
-				throw new UserException(null, 0, null);
+			HttpResponse<String> response = httpClient.send(request, BodyHandlers.ofString());
+
+			if (response.statusCode() == 200) {
+				Map<String, Object> userData = objectMapper.readValue(response.body(), Map.class);
+
+				Map<String, String> userAttributes = new HashMap<>();
+				userAttributes.put("id", (String) userData.get("id"));
+				userAttributes.put("displayName", (String) userData.get("displayName"));
+				userAttributes.put("mail", (String) userData.get("mail"));
+				userAttributes.put("userPrincipalName", (String) userData.get("userPrincipalName"));
+				return userAttributes;
+
+			} else if (response.statusCode() == 404) {
+				throw new UserException("Usuario no encontrado en Entra ID", 404, response.body());
+			} else {
+				throw new UserException("Error al consultar Graph API", response.statusCode(), response.body());
 			}
 
-			SearchResult result = results.next();
-			String userDN = result.getNameInNamespace();
-
-			Properties authEnv = new Properties();
-			authEnv.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-			authEnv.put(Context.PROVIDER_URL, "");
-			authEnv.put(Context.SECURITY_AUTHENTICATION, "simple");
-			authEnv.put(Context.SECURITY_PRINCIPAL, userDN);
-			authEnv.put(Context.SECURITY_CREDENTIALS, password);
-
-			DirContext authContext = new InitialDirContext(authEnv);
-			Attributes attrs = authContext.getAttributes(userDN, attributesToReturn);
-			Map<String, String> userAttributes = new HashMap<>();
-			for(String attrName : attributesToReturn) {
-				Attribute attr = attrs.get(attrName);
-				if(attr != null) {
-					userAttributes.put(attrName, attr.get().toString());
-				}
-			}
-			dirContext.close();
-			authContext.close();
-			return userAttributes;
-
-		} catch (AuthenticationException e) {
-			throw new UserException("Credenciales inválidas: " + e.getMessage(), 401, e.getMessage());
-		} catch (NameNotFoundException e) {
-			throw new UserException("Usuario no encontrado en LDAP: " + e.getMessage() , 404, e.getMessage());
-		} catch (CommunicationException e) {
-			throw new UserException("No se pudo conectar al servidor LDAP: " + e.getMessage(), 503, e.getMessage());
-		} catch (NamingException e) {
-			throw new UserException("Error general al autenticar con LDAP: " + e.getMessage(), 500, e.getMessage());
+		} catch (UserException e) {
+			throw e;
 		} catch (Exception e) {
-			throw new UserException("Error inesperado al autenticar usuario: " + e.getMessage(), 500, e.getMessage());
+			throw new UserException("Error inesperado al autenticar con Entra ID: " + e.getMessage(), 500, e.getMessage());
 		}
+	}
+
+
+	private String obtenerAccessToken() throws Exception {
+		String form = "client_id=" + CLIENT_ID +
+				"&scope=https%3A%2F%2Fgraph.microsoft.com%2F.default" +
+				"&client_secret=" + CLIENT_SECRET +
+				"&grant_type=client_credentials";
+
+		HttpRequest request = HttpRequest.newBuilder()
+				.uri(URI.create(TOKEN_ENDPOINT))
+				.header("Content-Type", "application/x-www-form-urlencoded")
+				.POST(HttpRequest.BodyPublishers.ofString(form))
+				.build();
+
+		HttpResponse<String> response = httpClient.send(request, BodyHandlers.ofString());
+
+		if (response.statusCode() != 200) {
+			throw new UserException("No se pudo obtener token de Entra ID", response.statusCode(), response.body());
+		}
+
+		Map<String, Object> json = objectMapper.readValue(response.body(), Map.class);
+		return (String) json.get("access_token");
 	}
 
 }

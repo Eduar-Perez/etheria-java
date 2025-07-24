@@ -79,6 +79,7 @@ public class UserHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
 			case "instructions/general" -> handleInstruction(body, token);
 			case "deleteHistory" -> handleDeleteHistory(body, token);
 			case "updateTitle" -> handleUpdateTitle(body, token);
+			case "updateUser" -> handleUpdateUser(body, token);
 			default -> new Response<>(400, "Acción no válida", null);
 			};
 
@@ -91,6 +92,26 @@ public class UserHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
 			log.error(Constants.ERROR_REQUEST, e);
 			return buildErrorResponse(500, e.getMessage());
 		}
+	}
+
+	private Response<?> handleUpdateUser(Map<String, Object> body, String token) {
+		Map<String, String> data = mapper.convertValue(body.get("data"), new TypeReference<>() {});
+		if(isNullOrEmpty(data.get(Constants.EMAIL)) && token.isEmpty()) {
+			log.error(Constants.RESPONSE_GENERIC + Constants.RESPONSE_400_CC);
+			return new Response<>(400, Constants.RESPONSE_GENERIC, Constants.RESPONSE_400_CC);
+		}
+
+		UserDto userDto = new UserDto(
+				data.get(Constants.CC),
+				data.get(Constants.FIRST_NAME),
+				data.get(Constants.LAST_NAME),
+				data.get(Constants.EMAIL),
+				data.get(Constants.PASSWORD),
+				data.get(Constants.ROLE),
+				data.get(Constants.IMAGE),
+				data.get(Constants.AUTHTYPE));
+
+		return userServiceImpl.updateDataUser(userDto, token);
 	}
 
 	private Response<?> handleUpdateTitle(Map<String, Object> body, String token) {

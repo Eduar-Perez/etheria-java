@@ -26,6 +26,7 @@ public class Constants {
 	public static final String ERROR_ILLEGAL_BLOCK_SIZE = "Error: Tamaño de bloque ilegal durante la desencriptación: ";
 	public static final String DECRYPT_PASSWORD = "Error: Ocurrió un error inesperado durante la desencriptación: ";
 	public static final String TOKEN_EXPIRATED = "Error: El token ha expirado: ";
+	public static final String TOKEN_DECOUDER = "Error: No se puede decodificar el token: ";
 	public static final String ERROR_CONTRASENA = "Se requiere la contraseña para la consulta ";
 	
 	public static final String ERROR_SQL_GET_USER_EMAIL = "Error SQL: Al obtener el usuario por correo electrónico: ";
@@ -34,6 +35,7 @@ public class Constants {
 	public static final String ERROR_SQL_GET_RECORD = "Error SQL: Durante la consulta del historial: ";
 	public static final String ERROR_SQL_SAVE_RECORD = "Error SQL: Durante la creación de la relación del usuario con el historial: ";
 	public static final String ERROR_SQL_UPDATE_RECORD = "Error SQL: Durante la actualización de historial: ";
+	public static final String ERROR_SQL_UPDATE_USER = "Error SQL: Durante la actualización del usuario: ";
 	public static final String ERROR_SQL_GET_UPDATE = "Error SQL: Durante la consulta de las instrucciones: ";
 	public static final String ERROR_SQL_DELETE_RECORDS = "Error SQL: Durante la eliminación del historial: ";
 	public static final String ERROR_GET_RECORDS = "Error: Durante la consulta del historial: ";
@@ -51,6 +53,8 @@ public class Constants {
 	public static final String GENERATE_TOKEN = "Se genera el token con exito. ";
 	public static final String ERROR_REGISTER = "Error registrando al usuario: ";
 	public static final String ERROR_LOGIN = "Error en login: ";
+	public static final String ERROR_UPDATEUSER = "Error editando la información del usuario: ";
+	
 
 	//Object-user
 	public static final String QUESTION = "question";
@@ -88,6 +92,7 @@ public class Constants {
 	public static final String RESPONSE_GENERIC = "Error: Datos incompletos ...";
 	public static final String RESPONSE_REGISTER = "Todos los datos son obligatorios. ";  
 	public static final String RESPONSE_LOGIN = "El correo y la contraseña son obligatorios. ";  
+	public static final String RESPONSE_400_CC = "El correo electronico y el rol son obligatorios. ";  
 	public static final String RESPONSE_LOGOUT = "El token es obligatorio. ";  
 	public static final String RESPONSE_QUERYAGENT = "La pregunta, la cedula y el token son obligatorios. ";  
 	public static final String RESPONSE_DELETE = "El id es obligatorio. ";	

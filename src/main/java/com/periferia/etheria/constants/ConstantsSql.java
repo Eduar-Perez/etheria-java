@@ -18,6 +18,8 @@ public enum ConstantsSql {
 			+ "INNER JOIN etheria.record r on ru.id_record = r.id "
 			+ "INNER JOIN etheria.title_record tr on ru.id_title_record = tr.id "
 			+ "WHERE tr.id_user = ?"),
+	VAR_SENTENCIA_SQL_UPDATE_USER("UPDATE etheria.users SET cedula = ?, first_name = ?, last_name = ?, email = ?, password = ?, role = ?, image = ? WHERE etheria.users.cedula = ? "
+			+ "RETURNING cedula, first_name, last_name, email, password, role, image"),
 	VAR_SENTENCIA_SQL_SAVE_CHAT("INSERT INTO etheria.record (question, response) VALUES (?, ?)"),
 	VAR_SENTENCIA_SQL_SAVE_TITLE_RECORD("INSERT INTO etheria.title_record (title, date_create, id_user, uuid) VALUES (?, ?, ?, ?)"),
 	VAR_SENTENCIA_SQL_SAVE_RECORD_USER("INSERT INTO etheria.record_users (id_record, id_title_record) VALUES (?, ?)"),
