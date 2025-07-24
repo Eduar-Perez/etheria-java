@@ -58,6 +58,7 @@ public class Constants {
 
 	//Object-user
 	public static final String QUESTION = "question";
+	public static final String RESPONSE = "response";
 	public static final String MODEL = "model";
 	public static final String AGENT = "agent_id";
 	public static final String UUID = "uuid";

@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.periferia.etheria.config.DBConfig;
 import com.periferia.etheria.constants.Constants;
-import com.periferia.etheria.dto.FilesDto;
 import com.periferia.etheria.dto.InstructionDto;
 import com.periferia.etheria.dto.QueryAgentDto;
 import com.periferia.etheria.dto.UserDto;
@@ -22,17 +21,13 @@ import com.periferia.etheria.repository.impl.UserRepositoryImpl;
 import com.periferia.etheria.security.JwtService;
 import com.periferia.etheria.security.LdapService;
 import com.periferia.etheria.service.AgentQueryService;
-import com.periferia.etheria.service.impl.AgentIAClientServiceImpl;
 import com.periferia.etheria.service.impl.AgentQueryServiceImpl;
 import com.periferia.etheria.service.impl.InstructionServiceImpl;
 import com.periferia.etheria.service.impl.RecordServiceImpl;
 import com.periferia.etheria.service.impl.UserServiceImpl;
 import com.periferia.etheria.util.Response;
 import lombok.extern.slf4j.Slf4j;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
 public class UserHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
@@ -52,13 +47,12 @@ public class UserHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
 		InstructionRepositoryImpl instructionRepositoryImpl = new  InstructionRepositoryImpl(dataBaseConnection);
 		JwtService jwtService = new JwtService(jwtSecret);
 		RecordServiceImpl recordService = new RecordServiceImpl(recordRepository, jwtService);
-		AgentIAClientServiceImpl agenClient = new AgentIAClientServiceImpl();
 		LdapService ldapService = new LdapService();
 
 		this.mapper.registerModule(new JavaTimeModule());
 		this.mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 		this.userServiceImpl = new UserServiceImpl(userRepository, jwtService, ldapService);
-		this.agentQueryService = new AgentQueryServiceImpl(jwtService, recordService, recordUserRepositoryImpl, agenClient);
+		this.agentQueryService = new AgentQueryServiceImpl(jwtService, recordService, recordUserRepositoryImpl);
 		this.recordServiceImpl = new RecordServiceImpl(recordRepository, jwtService);
 		this.instructionService = new InstructionServiceImpl(instructionRepositoryImpl, jwtService);
 	}
@@ -166,31 +160,20 @@ public class UserHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
 
 	private Response<?> handleQueryAgent(Map<String, Object> body, String token) {
 		Map<String, Object> data = mapper.convertValue(body.get("data"), new TypeReference<>() {});
-		if (data.get(Constants.MODEL) == null || data.get(Constants.QUESTION) == null ||
+		if (data.get(Constants.QUESTION) == null || data.get(Constants.RESPONSE) == null ||
 				data.get(Constants.CC) == null || token == null) {
 			log.error(Constants.RESPONSE_GENERIC + Constants.RESPONSE_QUERYAGENT);
 			return new Response<>(400, Constants.RESPONSE_GENERIC + Constants.RESPONSE_QUERYAGENT, null);
 		}
 
-		List<FilesDto> files = Optional.ofNullable(data.get(Constants.FILES))
-				.map(obj -> mapper.convertValue(obj, new TypeReference<List<FilesDto>>() {}))
-				.orElse(new ArrayList<>());
-		List<InstructionDto> instructions = Optional.ofNullable(data.get(Constants.INSTRUCTIONS))
-				.map(obj -> mapper.convertValue(obj, new TypeReference<List<InstructionDto>>() {}))
-				.orElse(new ArrayList<>());
+		QueryAgentDto queryAgentDto = new QueryAgentDto();
+		queryAgentDto.setQuestion((String) data.get(Constants.QUESTION));
+		queryAgentDto.setResponse((String) data.get(Constants.RESPONSE));
+		queryAgentDto.setUuid((String) data.get(Constants.UUID));
+		queryAgentDto.setCedula((String) data.get(Constants.CC));
+		queryAgentDto.setTitle((String) data.get(Constants.TITLE));
 
-		QueryAgentDto dto = new QueryAgentDto();
-		dto.setModel((String) data.get(Constants.MODEL));
-		dto.setAgentId((String) data.get(Constants.AGENT));
-		dto.setQuestion((String) data.get(Constants.QUESTION));
-		dto.setUuid((String) data.get(Constants.UUID));
-		dto.setCedula((String) data.get(Constants.CC));
-		dto.setTitle((String) data.get(Constants.TITLE));
-		dto.setTools((Boolean) data.get(Constants.TOOLS));
-		dto.setFiles(files);
-		dto.setInstructions(instructions);
-
-		return agentQueryService.requestQuery(token, dto);
+		return agentQueryService.requestQuery(token, queryAgentDto);
 	}
 
 	private Response<?> handleGetRecords(Map<String, Object> body, String token) {

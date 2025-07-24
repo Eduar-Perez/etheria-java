@@ -35,9 +35,9 @@ public class RecordUserRepositoryImpl implements RecordUserRepository {
 
 	@Override
 	public TitleRecordEntity getTitleRecord(String title, String idUser) {
-
 		log.info(Constants.LOGIN_SERVICE, Thread.currentThread().getStackTrace()[1].getMethodName());
 		StringBuilder sqlBuilder = new StringBuilder(ConstantsSql.VAR_SENTENCIA_SQL_GET_TITLE_RECORD.getValue());
+		
 		try(Connection connection = dataBaseConnection.getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(sqlBuilder.toString())) {
 
@@ -67,6 +67,7 @@ public class RecordUserRepositoryImpl implements RecordUserRepository {
 	public TitleRecordEntity saveTitleRecordEntity(String title, String idUser, String uuid, String question, String response) {
 		log.info(Constants.LOGIN_SERVICE, Thread.currentThread().getStackTrace()[1].getMethodName());
 		StringBuilder sqlBuilder = new StringBuilder(ConstantsSql.VAR_SENTENCIA_SQL_SAVE_TITLE_RECORD.getValue());
+		
 		try(Connection connection = dataBaseConnection.getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(sqlBuilder.toString(), Statement.RETURN_GENERATED_KEYS)) {
 			List<RecordEntity> recordsEntity = new ArrayList<>();
@@ -87,6 +88,7 @@ public class RecordUserRepositoryImpl implements RecordUserRepository {
 			recordUserEntity.setIdUser(generatedKeys.getString(4));
 			recordUserEntity.setUuid(generatedKeys.getString(5));
 			recordUserEntity.setRecordEntity(recordsEntity);
+			
 			return recordUserEntity;
 
 		} catch (Exception e) {
@@ -98,6 +100,7 @@ public class RecordUserRepositoryImpl implements RecordUserRepository {
 	public RecordUserEntity saveRecordUser(Long idRecord, Long idTitleRecord) {
 		log.info(Constants.LOGIN_SERVICE, Thread.currentThread().getStackTrace()[1].getMethodName());
 		StringBuilder sqlBuilder = new StringBuilder(ConstantsSql.VAR_SENTENCIA_SQL_SAVE_RECORD_USER.getValue());
+		
 		try(Connection connection = dataBaseConnection.getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(sqlBuilder.toString(), Statement.RETURN_GENERATED_KEYS)) {
 
@@ -111,6 +114,7 @@ public class RecordUserRepositoryImpl implements RecordUserRepository {
 			recordEntity.setId(generatedKeys.getLong(1));
 			recordEntity.setIdRecord(generatedKeys.getLong(2));
 			recordEntity.setIdTitleRecord(generatedKeys.getString(3));
+			
 			return recordEntity;
 
 		} catch (Exception e) {
